@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="zju.bs.dao.IOTMessageDao">
+    <insert id="insertMessage" parameterType="IOTMessage">
+        insert into message(clientId, info, value, alert, lng, lat, timestamp) values(#{clientId}, #{info}, #{value}, #{alert}, #{lng}, #{lat}, #{timestamp})
+    </insert>
+    <select id="getMessages" parameterType="string" resultType="IOTMessage">
+        select message.clientId, message.info, message.value, message.alert, message.lng, message.lat, message.timestamp
+        from message, userdevice where userdevice.account=#{account} and message.clientId = userdevice.deviceId;
+    </select>
+
+    <select id="selectMessages" parameterType="MessageQuery" resultType="IOTMessage">
+        select message.clientId, message.info, message.value, message.alert, message.lng, message.lat, message.timestamp
+        from message, userdevice where userdevice.account=#{token} and message.clientId = userdevice.deviceId
+        <if test="beginTime > -1">
+            and message.timestamp &gt;= #{beginTime}
+        </if>
+        <if test="endTime > -1">
+            and message.timestamp &lt;= #{endTime}
+        </if>
+        <if test="clientId != '' and clientId != null">
+            and message.clientId = #{clientId}
+        </if>
+
+        <if test="alert != -1">
+            and message.alert = #{alert}
+        </if>
+
+        <if test="lowValue != -2147483647">
+            and message.value &gt;= #{lowValue}
+        </if>
+
+        <if test="highValue != 2147483647">
+            and message.value &lt;= #{highValue}
+        </if>
+
+    </select>
+
+    <select id="getDevices" parameterType="string" resultType="UserDevice">
+        select * from userdevice where account=#{account};
+    </select>
+    <insert id="addDevice" parameterType="UserDevice">
+        insert into userdevice(account, deviceId, deviceName, deviceInfo) values(#{account}, #{deviceId}, #{deviceName}, #{deviceInfo});
+    </insert>
+
+    <update id="updateDevice" parameterType="UserDevice">
+        update userdevice set deviceName = #{deviceName}, deviceInfo = #{deviceInfo} where account = #{account} and deviceId = #{deviceId};
+    </update>
+
+    <delete id="deleteDevice" parameterType="UserDevice">
+        delete from userDevice where account = #{account} and deviceId = #{deviceId};
+    </delete>
+
+
+    <select id="testDao" resultType="IOTMessage">
+        select * from message;
+    </select>
+    <select id="testDao2" resultType="UserDevice">
+        select * from userdevice;
+    </select>
+</mapper>
